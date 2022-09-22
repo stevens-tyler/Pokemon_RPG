@@ -1,6 +1,7 @@
 import pygame
 
 class HealthBar():
+    ## --- Contructor ---
     def __init__(self, x, y, hp, max_hp):
         self.x = x
         self.y = y
