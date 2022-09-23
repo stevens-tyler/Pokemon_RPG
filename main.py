@@ -1,7 +1,8 @@
-
+from cmath import pi
 import pygame
 from Pokemon import Pokemon
 from HealthBar import HealthBar
+import Button
 
 # Start Pygame
 pygame.init()
@@ -23,7 +24,9 @@ total_fighters = 2
 actions_cooldown = 0
 action_wait_time = 500
 attack = False
+potion = False
 target = None
+clicked = False
 
 # Background
 background_img = pygame.image.load("imgs/back_ground.png").convert_alpha()
@@ -31,6 +34,13 @@ panel_img = pygame.image.load("imgs/bottom_panel.png").convert_alpha()
 
 # Screen Text
 font = pygame.font.SysFont('Times New Roman', 26)
+
+# Pokeball image
+pokeball_img = pygame.image.load("imgs/pokeball.png").convert_alpha()
+
+# Potion Button
+potion_img = pygame.image.load("imgs/potion.png").convert_alpha()
+potion_button = Button.Button(screen, 100, screen_height - bottom_panel + 70, potion_img, 60, 60)
 
 # --- Function for drawing text ---
 def draw_text(text,font, text_col, x,y):
@@ -88,20 +98,39 @@ while run:
     charmander.draw_pokemon(screen)
     charmander_health_bar.draw(screen, charmander.hp)
 
-    # Action vairables
+    # Player Commands
     attack = False
+    potion = False
     target = None
+    pygame.mouse.set_visible(True)
     pos = pygame.mouse.get_pos()
     if charmander.rect.collidepoint(pos):
         pygame.mouse.set_visible(False)
-
+        screen.blit(pokeball_img, pos)
+        if clicked == True:
+            attack = True
+            target = charmander
+    if potion_button.draw():
+        potion = True        
+    
     # Pikachu Action
     if pikachu.awake and current_fighter == 1:
         actions_cooldown +=1
         if actions_cooldown >= action_wait_time:
-            pikachu.attack(charmander)
-            current_fighter += 1
-            actions_cooldown = 0
+            if attack == True and target != None:
+                pikachu.attack(target)
+                current_fighter += 1
+                actions_cooldown = 0
+            if potion == True:
+                if pikachu.max_hp - pikachu.hp > 15:
+                    heal_amount = 15
+                else:
+                    heal_amount = pikachu.max_hp - pikachu.hp
+
+                pikachu.hp += heal_amount   
+                current_fighter += 1
+                actions_cooldown = 0 
+
 
     # Charmander Action
     if charmander.awake and current_fighter == 2:
@@ -115,6 +144,10 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            clicked = True
+        else:
+            clicked = False    
 
     # Draw screen
     pygame.display.update()
