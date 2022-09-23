@@ -2,21 +2,21 @@ import pygame
 from Pokemon import Pokemon
 from HealthBar import HealthBar
 
-# Start pygame
+# Start Pygame
 pygame.init()
 
-# Frame rate
+# Frame Rate
 clock = pygame.time.Clock()
 fps = 60
 
-# Game window
+# Game Window
 bottom_panel = 150
 screen_width = 800
 screen_height = 400 + bottom_panel
 screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Battle")
+pygame.display.set_caption("Coach Tyler's Pokemon Clone")
 
-# Define game variables
+# Define Action Variables
 current_fighter = 1
 total_fighters = 2
 actions_cooldown = 0
@@ -28,7 +28,7 @@ target = None
 background_img = pygame.image.load("imgs/back_ground.png").convert_alpha()
 panel_img = pygame.image.load("imgs/bottom_panel.png").convert_alpha()
 
-# Screen text
+# Screen Text
 font = pygame.font.SysFont('Times New Roman', 26)
 
 # --- Function for drawing text ---
@@ -42,10 +42,11 @@ def draw_bg():
 
 # --- Function for drawing background_img ---
 def draw_panel(player, opponent):
-    # Draw rectanlge panel
+
+    # Draw Rectangular Panel
     screen.blit(panel_img, (0, screen_height - bottom_panel))
 
-    # Show states
+    # Show States
     draw_text(f'{player.name} HP: {player.hp}',font,(255, 0 ,0),70,screen_height-bottom_panel + 10)
     draw_text(f'{opponent.name} HP: {opponent.hp}', font, (255,0,0), 530, (screen_height - bottom_panel + 10))
 
@@ -61,57 +62,55 @@ enemy_y = 190
 charmander = Pokemon(enemy_x,enemy_y, 'Charmander', 150, 60, 2.2)
 charmander.choose()
 
-# Health bars (x, y, max_hp, hp)
+# Health Bars (x-coord, y-coord, max_hp, hp)
 pikachu_health_bar = HealthBar(70, screen_height - bottom_panel + 40, pikachu.max_hp, pikachu.hp)
 charmander_health_bar = HealthBar(530, screen_height - bottom_panel + 40,charmander.max_hp, charmander.hp)
 
 
-# Main game loop
+# Main Game Loop
 run = True
 while run:
 
-    # Draw background
+    # Draw Background
     draw_bg()
 
-    # Draw panel
+    # Draw Panel
     draw_panel(pikachu, charmander)
 
-    # Draw pikachu
+    # Draw Pikachu
+    pikachu.update()
     pikachu.draw_pokemon(screen)
     pikachu_health_bar.draw(screen, pikachu.hp)
 
-    # Draw pikachu
+    # Draw Charamander
+    charmander.update()
     charmander.draw_pokemon(screen)
     charmander_health_bar.draw(screen, charmander.hp)
 
-    # Control player actions
-    #reset action variables
+    # Action vairables
     attack = False
     target = None
     pos = pygame.mouse.get_pos()
     if charmander.rect.collidepoint(pos):
         pygame.mouse.set_visible(False)
-        
 
-    # Pikachu action
-    if pikachu.awake:
-        if current_fighter == 1:
-            actions_cooldown +=1
-            if actions_cooldown >= action_wait_time:
-                pikachu.attack(charmander)
-                current_fighter += 1
-                actions_cooldown = 0
+    # Pikachu Action
+    if pikachu.awake and current_fighter == 1:
+        actions_cooldown +=1
+        if actions_cooldown >= action_wait_time:
+            pikachu.attack(charmander)
+            current_fighter += 1
+            actions_cooldown = 0
 
-    # Charmander action
-    if charmander.awake:
-        if current_fighter == 2:
-            actions_cooldown +=1
-            if actions_cooldown >= action_wait_time:
-                charmander.attack(pikachu)
-                current_fighter = 1
-                actions_cooldown = 0
+    # Charmander Action
+    if charmander.awake and current_fighter == 2:
+        actions_cooldown +=1
+        if actions_cooldown >= action_wait_time:
+            charmander.attack(pikachu)
+            current_fighter = 1
+            actions_cooldown = 0
 
-    # Check quit event
+    # Event Handler
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
